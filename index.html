@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #ffafbd 0%, #ffc3a0 100%);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .heart-main {
+            background-color: #ff4d4d;
+            display: inline-block;
+            height: 50px;
+            margin: 0 10px;
+            position: relative;
+            transform: rotate(-45deg);
+            width: 50px;
+            animation: heartBeatMain 0.8s infinite alternate;
+            transition: animation-duration 0.5s ease;
+        }
+        .heart-main:before, .heart-main:after {
+            content: "";
+            background-color: #ff4d4d;
+            border-radius: 50%;
+            height: 50px;
+            position: absolute;
+            width: 50px;
+        }
+        .heart-main:before { top: -25px; left: 0; }
+        .heart-main:after { left: 25px; top: 0; }
+
+        @keyframes heartBeatMain {
+            to { transform: scale(1.2) rotate(-45deg); }
+        }
+
+        .ecg-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        svg {
+            width: 100%;
+            height: 300px;
+        }
+
+        .pulse-line {
+            fill: none;
+            stroke: #ff1a1a;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.7));
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: dash 5s linear infinite;
+        }
+
+        @keyframes dash {
+            from { stroke-dashoffset: 2000; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .heart-particle {
+            position: fixed;
+            top: -10%;
+            font-size: 24px;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+            z-index: 100;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        .single-line-text {
+            white-space: nowrap;
+            display: block;
+            width: 100%;
+        }
+
+        #player {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body onclick="playMusic()">
+
+    <div id="player"></div>
+
+    <div class="ecg-container">
+        <svg viewBox="0 0 2000 200" preserveAspectRatio="none">
+            <path id="pulsePath" class="pulse-line" d="M0,100 L400,100 L420,80 L440,120 L460,20 L480,180 L500,100 L900,100 L920,80 L940,120 L960,20 L980,180 L1000,100 L1400,100 L1420,80 L1440,120 L1460,20 L1480,180 L1500,100 L1900,100 L1920,80 L1940,120 L1960,20 L1980,180 L2000,100" />
+        </svg>
+    </div>
+
+    <div class="text-center p-10 bg-white/40 backdrop-blur-lg rounded-[40px] shadow-2xl border border-white/30 max-w-lg w-full mx-4 z-10">
+        <div id="content">
+            <div class="flex justify-center mb-12 mt-6">
+                <div id="centerHeart" class="heart-main"></div>
+            </div>
+            
+            <h1 id="question" class="text-2xl md:text-3xl font-extrabold text-red-600 mb-10 drop-shadow-sm single-line-text">
+                Will you be my Valentine? ❤️
+            </h1>
+            
+            <div id="button-container" class="flex justify-center gap-6 items-center min-h-[140px]">
+                <button id="yesBtn" 
+                        onmouseenter="speedUp()" 
+                        onmouseleave="slowDown()"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform duration-300">
+                    Yes
+                </button>
+                <button id="noBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-10 rounded-full shadow-lg">
+                    No
+                </button>
+            </div>
+        </div>
+
+        <p class="mt-12 text-sm text-gray-800 font-bold tracking-widest uppercase opacity-75">Created By : Nisal Sayuranga</p>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        let player;
+        let isStarted = false;
+
+         
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'asG7cwxi1sA',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'asG7cwxi1sA'
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+             
+        }
+
+        function playMusic() {
+            if (player && !isStarted) {
+                player.playVideo();
+                isStarted = true;
+            }
+        }
+
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const content = document.getElementById('content');
+        const pulsePath = document.getElementById('pulsePath');
+        const centerHeart = document.getElementById('centerHeart');
+
+        let yesSize = 1;
+        let noClicks = 0;
+        const messages = ["Sure?", "Really?", "Think!", "Last chance!", "🥺", "Sad...", "Please?", "Yes!"];
+
+        function speedUp() {
+            pulsePath.style.animationDuration = "2.5s"; 
+            centerHeart.style.animationDuration = "0.5s";
+        }
+
+        function slowDown() {
+            pulsePath.style.animationDuration = "5s"; 
+            centerHeart.style.animationDuration = "0.8s";
+        }
+
+        noBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            yesSize += 0.25;
+            yesBtn.style.transform = `scale(${yesSize})`;
+            noBtn.innerText = messages[Math.min(noClicks, messages.length - 1)];
+            noClicks++;
+        });
+
+        yesBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            content.innerHTML = `
+                <div class="flex justify-center mb-16 mt-6">
+                    <div class="heart-main" style="background-color: #ff0000; animation-duration: 0.3s;"></div>
+                </div>
+				<h1 class="text-4xl font-extrabold text-red-600 mb-4 animate-bounce">❤️You Make My Day❤️</h1>
+                <h1 class="text-4xl font-extrabold text-red-600 mb-4 animate-bounce">I Love You BooBii! </h1>
+				<h1 class="text-4xl font-extrabold text-red-600 mb-4 animate-bounce">❤️❤️❤️❤️❤️❤️</h1>
+            `;
+            pulsePath.style.animationDuration = "0.8s"; 
+            startHeartRain();
+        });
+
+        function startHeartRain() {
+            const heartIcons = ['❤️', '💖', '💝', '💕', '💗'];
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-particle');
+                heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.style.left = Math.random() * 100 + "vw";
+                heart.style.animationDuration = (Math.random() * 2 + 2) + "s";
+                heart.style.fontSize = (Math.random() * 20 + 20) + "px";
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
